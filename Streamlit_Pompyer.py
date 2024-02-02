@@ -78,6 +78,7 @@ if page==pages[1]:
                 - Notional Cost (£) : (float) coût de l'incident
                 - Numcalls : (float) nombre d'appels pour un incident
                 """)
+    st.dataframe(Incident.head(10))
  
     st.subheader("La table 'Mobilisation'")
     st.markdown("Cette table contient 560 530 enregistrements répartis sur 22 colonnes. Elle recence, pour chaque incident, le premier véhicule mobilisé et éventuellement le second. Ses colonnes sont :")
@@ -105,6 +106,7 @@ if page==pages[1]:
                 - DelayCodeId : (float)	Code du retard
                 - DelayCode_Description : (object)	Description du retard
                 """)
+    st.dataframe(Mobilisation.head(10))
     
     st.subheader("La table 'Calendrier'")
     st.markdown("Cette table contient 1 247 enregistrements répartis sur 4 colonnes. Elle indique, pour chaque date entre le 1er janvier 2020 et le 31 mai 2023, s'il y a une caractéristique particulière. Ses colonnes sont :")
@@ -114,6 +116,7 @@ if page==pages[1]:
                 - vacances : (int) variable binaire qui indique si le jour est inclus dans des vacances scolaires ou non
                 - COVID : (int) variable binaire qui indique si le jour faisait partie d'une période de confinement
                 """)
+    st.dataframe(Calendrier.head(10))
 
     st.subheader("La table 'Coordonnees_brigade'")
     st.markdown("Cette table contient 109 enregistrements répartis sur 4 colonnes. Elle recense pour chaque caserne ses coordonnées géographiques. Ses colonnes sont :")
@@ -123,6 +126,7 @@ if page==pages[1]:
                 - Latitude : (float) latitude de la caserne
                 - Longitude : (float) longitude de la caserne
                 """)
+    st.dataframe(Coordonnees_brigade.head(10))
     
     st.subheader("La table 'Meteo'")
     st.markdown("Cette table contient 1 441 enregistrements répartis sur 6 colonnes. Elle mentionne pour chaque date les principales caractéristiques météorologiques. Ses colonnes sont :")
@@ -134,3 +138,24 @@ if page==pages[1]:
                 - precip : (float) niveau de précipitation
                 - snow : (float) cm de neige
                 """)
+    st.dataframe(Meteo.head(10))
+
+if page==pages[2]:
+    st.header("Visualisation")
+    st.subheader("Répartition des incidents par mois et par heures d’appel")
+    Incident['DateOfCall_bis'] = pd.to_datetime(Incident['DateOfCall'])
+    Incident["MonthOfCall"] = Incident['DateOfCall_bis'].dt.month
+    Incident_gprmonth = Incident.groupby(["MonthOfCall","CalYear"]).count().reset_index() 
+    fig=plt.figure()
+    sn.lineplot(data=Incident_gprmonth, x="MonthOfCall", y="IncidentNumber", hue="CalYear", style="CalYear",dashes=False,markers=True,sizes=(.25, 2.5))
+    st.pyplot(fig)
+    fig2=plt.figure()
+    Incident['HourOfCall'].value_counts(normalize=True).plot(kind='bar')
+    st.pyplot(fig2)
+
+    st.subheader("Répartition des incidents par catégorie")
+    fig3=plt.figure()
+    Incident['IncidentGroup'].value_counts(normalize=True).plot(kind='pie')
+    st.pyplot(fig3)
+    Incident['IncidentGroup'].value_counts(normalize=True)*100
+    Incident['StopCodeDescription'].value_counts(normalize=True)*100
