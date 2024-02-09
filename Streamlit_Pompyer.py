@@ -3,16 +3,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sn
+import plotly.express as px
+import plotly.graph_objects as go
+import joblib
 
 Incident=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/LFB Incident data Last 3 years.csv")
 Mobilisation=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/LFB Mobilisation data Last 3 years.csv", sep=';')
 Coordonnees_brigade=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/LondonFireBrigade_Coordonnées.csv",sep=';')
 Calendrier=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/London_Pompyer_Calendrier.csv", sep=';')
 Meteo=pd.read_excel(r"\Users\agrabia\Documents\Formation\Projet/london_weather2.xlsx")
+Final_1=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Final_1_corrt.csv")
 
 st.title("Projet Pompyer")
 st.sidebar.title("Sommaire")
-pages=["Description du projet","Jeux de données","Visualisation","Préparation des données","Modélisation","Machine Learning","Conclusion"]
+pages=["Description du projet","Jeux de données","Visualisation","Préparation des données et Modélisation : Modèle à variables minimales","Préparation des données et Modélisation : Modèle à variables maximales" ,"Machine Learning : Modèle à variables minimales","Machine Learning : Modèle à variables maximales","Conclusion"]
 page=st.sidebar.radio("Aller vers",pages)
 
 if page==pages[0]:
@@ -34,6 +38,7 @@ if page==pages[1]:
     st.markdown("La seconde donnée pertinente à récupérer concerne le **calendrier scolaire**. Les périodes de congés sont généralement des moments avec moins de traffic (en dehors des départs et retours de vacances). De même, les dates des **jours fériés** ont été récupérées.")
     st.markdown("2020 a été une année de pandémie avec des confinements décrétés. Nous avons donc pris en compte les **dates de confinement** dans notre modèle.")
     st.markdown("Enfin, la distance à parcourir entre la caserne et le lieu de l'incident fait également partie des données à prendre en compte. Nous avons donc récupéré les **coordonnées géographiques de chaque caserne** via Google Maps.")
+    st.image('JDD.jpg')
 
     st.subheader("La table 'Incident'")
     st.markdown("Cette table contient 381 366 enregistrements répartis sur 39 colonnes. Chaque incident est unique au sein de cette table. Ses colonnes sont :")
@@ -78,7 +83,8 @@ if page==pages[1]:
                 - Notional Cost (£) : (float) coût de l'incident
                 - Numcalls : (float) nombre d'appels pour un incident
                 """)
-    st.dataframe(Incident.head(10))
+    if st.checkbox("Afficher les 10 premières lignes de la table Incident"):
+        st.dataframe(Incident.head(10))
  
     st.subheader("La table 'Mobilisation'")
     st.markdown("Cette table contient 560 530 enregistrements répartis sur 22 colonnes. Elle recence, pour chaque incident, le premier véhicule mobilisé et éventuellement le second. Ses colonnes sont :")
@@ -106,7 +112,8 @@ if page==pages[1]:
                 - DelayCodeId : (float)	Code du retard
                 - DelayCode_Description : (object)	Description du retard
                 """)
-    st.dataframe(Mobilisation.head(10))
+    if st.checkbox("Afficher les 10 premières lignes de la table Mobilisation"):
+        st.dataframe(Mobilisation.head(10))
     
     st.subheader("La table 'Calendrier'")
     st.markdown("Cette table contient 1 247 enregistrements répartis sur 4 colonnes. Elle indique, pour chaque date entre le 1er janvier 2020 et le 31 mai 2023, s'il y a une caractéristique particulière. Ses colonnes sont :")
@@ -116,7 +123,8 @@ if page==pages[1]:
                 - vacances : (int) variable binaire qui indique si le jour est inclus dans des vacances scolaires ou non
                 - COVID : (int) variable binaire qui indique si le jour faisait partie d'une période de confinement
                 """)
-    st.dataframe(Calendrier.head(10))
+    if st.checkbox("Afficher les 10 premières lignes de la table Calendrier"):
+        st.dataframe(Calendrier.head(10))
 
     st.subheader("La table 'Coordonnees_brigade'")
     st.markdown("Cette table contient 109 enregistrements répartis sur 4 colonnes. Elle recense pour chaque caserne ses coordonnées géographiques. Ses colonnes sont :")
@@ -126,7 +134,8 @@ if page==pages[1]:
                 - Latitude : (float) latitude de la caserne
                 - Longitude : (float) longitude de la caserne
                 """)
-    st.dataframe(Coordonnees_brigade.head(10))
+    if st.checkbox("Afficher les 10 premières lignes de la table Coordonnees_brigade"):
+        st.dataframe(Coordonnees_brigade.head(10))
     
     st.subheader("La table 'Meteo'")
     st.markdown("Cette table contient 1 441 enregistrements répartis sur 6 colonnes. Elle mentionne pour chaque date les principales caractéristiques météorologiques. Ses colonnes sont :")
@@ -138,24 +147,137 @@ if page==pages[1]:
                 - precip : (float) niveau de précipitation
                 - snow : (float) cm de neige
                 """)
-    st.dataframe(Meteo.head(10))
+    if st.checkbox("Afficher les 10 premières lignes de la table Meteo"):
+        st.dataframe(Meteo.head(10))
 
 if page==pages[2]:
     st.header("Visualisation")
+    st.markdown("Voici quelques modélisations issues des .")
     st.subheader("Répartition des incidents par mois et par heures d’appel")
     Incident['DateOfCall_bis'] = pd.to_datetime(Incident['DateOfCall'])
     Incident["MonthOfCall"] = Incident['DateOfCall_bis'].dt.month
     Incident_gprmonth = Incident.groupby(["MonthOfCall","CalYear"]).count().reset_index() 
-    fig=plt.figure()
-    sn.lineplot(data=Incident_gprmonth, x="MonthOfCall", y="IncidentNumber", hue="CalYear", style="CalYear",dashes=False,markers=True,sizes=(.25, 2.5))
-    st.pyplot(fig)
-    fig2=plt.figure()
-    Incident['HourOfCall'].value_counts(normalize=True).plot(kind='bar')
-    st.pyplot(fig2)
-
+    data=Incident_gprmonth
+    year_options=data["CalYear"].unique()
+    selected_year=st.selectbox("Sélectionnez une année",options=year_options,index=0)
+    filtered_data=data[data["CalYear"]==selected_year]
+    fig=px.line(filtered_data, x="MonthOfCall", y="IncidentNumber",animation_frame="CalYear")
+    st.plotly_chart(fig)
+    #fig=plt.figure()
+    #sn.lineplot(data=Incident_gprmonth, x="MonthOfCall", y="IncidentNumber", hue="CalYear", style="CalYear",dashes=False,markers=True,sizes=(.25, 2.5))
+    #st.pyplot(fig)
+    #fig2=plt.figure()
+    #Incident['HourOfCall'].value_counts(normalize=True).plot(kind='bar')
+    #st.pyplot(fig2)
+    st.image('Répartition_Heures.jpg')
     st.subheader("Répartition des incidents par catégorie")
-    fig3=plt.figure()
-    Incident['IncidentGroup'].value_counts(normalize=True).plot(kind='pie')
-    st.pyplot(fig3)
-    Incident['IncidentGroup'].value_counts(normalize=True)*100
+    #fig3=plt.figure()
+    #Incident['IncidentGroup'].value_counts(normalize=True).plot(kind='pie')
+    #st.pyplot(fig3)
+    #st.image('Répartition_catégorie.jpg')
+    labels=['False Alarm','Fire','Special Service']
+    values=[186923,57697,136746]
+    fig3=go.Figure(data=[go.Pie(labels=labels,values=values)])
+    st.plotly_chart(fig3)
     Incident['StopCodeDescription'].value_counts(normalize=True)*100
+    st.subheader("Répartition des incidents par caserne")
+    st.image('Caserne.jpg')
+    st.image('Caserne2.jpg')
+    st.subheader("Boîte à moustache du temps de trajet par heure (données 2020)")
+    st.image('Heures.jpg')
+
+if page==pages[3]:
+    st.header("Préparation des données et Modélisation : Modèle à variables minimales ")
+
+if page==pages[4]:
+    st.header("Préparation des données et Modélisation : Modèle à variables maximales")
+    st.markdown("""
+                - Une des premières remarques lors de l'observation des deux tables à disposition est la prépondérance des variables sous format Objet qui ne peuvent donc pas être traitées aisément en machine learning. 
+                - Ensuite, la relation entre la table Incident et la table Mobilisation est de l'ordre de 1 pour N, plusieurs équipages ayant pu être mobilisés sur une même intervention. Pour une meilleure cohérence dans les temps d'arrivée, seuls les premiers équipages ont été conservés donc variable PerformanceReporting à 1.
+                - Une fois la jointure faite entre la table Incident et la table Mobilisation, plusieurs suppression de variables vides, redondantes ou n'ayant a priori pas d'impact sur le temps d'arrivée ont été réalisées. """)
+    
+    if st.checkbox("Afficher toutes les suppressions"):
+        st.markdown("""
+                    - 'StopCode_Description' : Variable trop détaillée qui n'apporte pas grand-chose
+                    - Suppresion de la variable 'DateAndTimeReturned' vide
+                	- 'SpecialServiceType' : trop de valeurs nulles
+                	- 'PropertyCategory' : pas d'utilité pour le projet
+                	- 'PropertyType' : trop de catégories différentes
+                	- 'AddressQualifier' : variable qui ne peut être renseignée qu'a posteriori donc non utile pour le Machine Learning
+                	- 'Postcode_full' : trop de NA
+                	- 'Postcode_district' : trop fin
+                	- 'UPRN' et 'USRN' : pour la première, trop de NA, pour la seconde, trop de modalités distinctes
+                	- 'IncGeo_BoroughName' : on ne conserve que le code de l'arrondissement et non son nom
+                	- 'ProperCase' : idem que la variable précédente
+                	- 'IncGeo_WardCode','IncGeo_WardName','IncGeo_WardNameNew' : les variables liées au quartier n'ont pas été conservées
+                	- 'Easting_m','Northing_m' : Trop de NA
+                	- 'FRS' : une seule modalité donc inutile
+                	- 'IncidentStationGround' : redondant avec 'DeployedFromStation_Name'
+                	- 'FirstPumpArriving_AttendanceTime','SecondPumpArriving_AttendanceTime' : pas d'apport
+                	- 'FirstPumpArriving_DeployedFromStation','SecondPumpArriving_DeployedFromStation' : redondant avec 'DeployedFromStation_Name'
+                	- 'NumStationsWithPumpsAttending' : on se concentre sur la première brigade arrivée
+                	- 'NumPumpsAttending' : on se concentre sur la première brigade arrivée
+                	- 'PumpCount' : on se concentre sur la première brigade arrivée
+                	- 'PumpHoursRoundUp' : Pas d'apport sur la variable cible de durée du trajet
+                	- 'Notional Cost (£)' : pas d'info pertinente
+                	- 'Numcalls' : pas d'apport sur le projet
+                	- 'ResourceMobilisationId' : clé primaire de la table Mobilisation qui n'a plus d'utilité dans la table fusionnée
+                	- 'Resource_Code' : trop de modalités différentes
+                	- 'PerformanceReporting' : filtre sur la modalité 1
+                	- 'DateAndTimeMobilised','DateAndTimeMobile','DateAndTimeArrived', 'DateAndTimeLeft' : pas d'apport de l'heure exacte
+                	- 'TurnoutTimeSeconds' : pas d'impact sur la variable cible
+                	- 'AttendanceTimeSeconds' : regroupe temps de préparation + temps de trajet donc redondant avec la variable cible
+                	- 'DeployedFromStation_Code' : c'est le nom et non le code qui a été conservé
+                	- 'DeployedFromLocation' : pas d'utilité
+                	- 'PumpOrder' : on se concentre sur la première brigade arrivée
+                	- 'PlusCode_Code', 'PlusCode_Description' : une seule modalité donc inutile
+                	- 'DelayCode_Description' : le code a été conservé et non le nom
+                    - 'Latitude' et 'Longitude' : d'abord utilisées, elles comportaient trop de NA pour être vraiment exploitables
+                    """)
+    st.markdown("""
+                - Plusieurs variables, notamment temporelles, ont également été créées. """)
+    if st.checkbox("Afficher toutes les créations"):
+        st.markdown("""
+                    - Création d'une variable 'DateOfCall_bis', format date de la variable 'DateOfCall'
+                    - Création d'une variable 'MinuteOfCall' à partir de la variable 'TimeOfCall'
+                    - Création d'une variable 'Joursem' à partir de la variable 'DateOfCall_bis'
+                    - Création d'une variable 'mois' à partir de la variable 'DateOfCall__bis'
+                    - Création d'une variable 'jour' à partir de la variable 'DateOfCall_bis'
+                    """)
+    st.markdown("""
+                - Les valeurs vides de la variable 'DelayCodeId' ont été remplacées par la valeur 12 qui équivaut à pas de retard 
+                - Les modalités de la variable 'IncidentGroup^' ont été transformées en variable numérique
+                - Une fois ces modifications effectuées, cette table principale a été jointe aux tables Calendrier et Coordonnees_Brigade
+                - Le package BNG a permis de transformer les coordonnées géographiques britanniques en latitude et longitude. Le package Geopy a ensuite été utilisé pour calculer les distances entre le lieu de l'incident et les coordonnées de la caserne
+                - Les quelques NA présents sur la variable cible 'TravelTimeSeconds' ont été supprimés
+                - Le temps moyen de parcours en fonction de la caserne et de l'heure de l'appel ainsi que le temps moyen de parcours en fonction du quartier et de l'heure de départ ont été calculés. Les deux nouvelles variables ainsi créées ont pu remplacer les variables 'IncGeo_BoroughCode' et 'DeployedDromStation_Name'
+                - Enfin, la table principale a été jointe avec la table Meteo et la table finale a été exportée (Final_1)
+                """)
+    if st.checkbox("Afficher les 10 premières lignes de la table Final_1"):
+        st.dataframe(Final_1.head(10))
+    
+if page==pages[5]:
+    st.header("Machine Learning : Modèle à variables minimales")
+
+if page==pages[6]:
+    st.header("Machine Learning : Modèle à variables maximales")
+
+joblib.load("model_knn_tp")
+
+joblib.load("model_rf_tp")
+
+joblib.load("model_ac_tp")
+
+joblib.load('model_svmclf_tp')
+
+joblib.load('model_knn_5c')
+
+joblib.load('model_rf_5c')
+
+joblib.load('model_ac_5c')
+
+joblib.load('model_knn_3c')
+
+joblib.load('model_rf_3c')
+
+joblib.load('model_ac_3c')
