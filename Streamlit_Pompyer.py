@@ -16,7 +16,7 @@ Final_1=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Final_1_corrt.
 
 st.title("Projet Pompyer")
 st.sidebar.title("Sommaire")
-pages=["Description du projet","Jeux de données","Visualisation","Préparation des données et Modélisation : Modèle à variables minimales","Préparation des données et Modélisation : Modèle à variables maximales" ,"Machine Learning : Modèle à variables minimales","Machine Learning : Modèle à variables maximales","Conclusion"]
+pages=["Description du projet","Jeux de données","Visualisation","Préparation des données et Modélisation : Modèle à variables minimales","Préparation des données et Modélisation : Modèle à variables maximales" ,"Machine Learning : Modèle à variables minimales","Machine Learning : Modèle à variables maximales","Conclusion","Cartographie"]
 page=st.sidebar.radio("Aller vers",pages)
 
 if page==pages[0]:
@@ -262,22 +262,12 @@ if page==pages[5]:
 if page==pages[6]:
     st.header("Machine Learning : Modèle à variables maximales")
 
-joblib.load("model_knn_tp")
-
-joblib.load("model_rf_tp")
-
-joblib.load("model_ac_tp")
-
-joblib.load('model_svmclf_tp')
-
-joblib.load('model_knn_5c')
-
-joblib.load('model_rf_5c')
-
-joblib.load('model_ac_5c')
-
-joblib.load('model_knn_3c')
-
-joblib.load('model_rf_3c')
-
-joblib.load('model_ac_3c')
+    joblib.load("model_knn_tp")
+    joblib.load("model_rf_tp")
+    joblib.load("model_ac_tp")
+    joblib.load('model_knn_5c')
+    joblib.load('model_rf_5c')
+    joblib.load('model_ac_5c')
+    joblib.load('model_knn_3c')
+    joblib.load('model_rf_3c')
+    joblib.load('model_ac_3c')
