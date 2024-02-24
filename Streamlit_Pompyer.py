@@ -6,6 +6,9 @@ import seaborn as sn
 import plotly.express as px
 import plotly.graph_objects as go
 import joblib
+from sklearn import linear_model,preprocessing
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 
 Incident=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/LFB Incident data Last 3 years.csv")
 Mobilisation=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/LFB Mobilisation data Last 3 years.csv", sep=';')
@@ -261,13 +264,142 @@ if page==pages[5]:
 
 if page==pages[6]:
     st.header("Machine Learning : Modèle à variables maximales")
+    st.subheader("Temps de trajet")
+    Final_1=Final_1.dropna()
+    data=Final_1.drop(['TravelTimeSeconds','IncidentNumber','DateOfCall_bis','DelayCodeId_bis'], axis=1)
+    target=Final_1['TravelTimeSeconds']
+    X_train,X_test,y_train,y_test=train_test_split(data,target,test_size=0.2,random_state=66)
+    X_train_scaled=preprocessing.scale(X_train)
+    scaler=preprocessing.StandardScaler().fit(X_train)
+    X_train_scaled=scaler.transform(X_train)
+    scaler=preprocessing.StandardScaler().fit(X_test)
+    X_test_scaled=scaler.transform(X_test)
 
-    joblib.load("model_knn_tp")
-    joblib.load("model_rf_tp")
-    joblib.load("model_ac_tp")
-    joblib.load('model_knn_5c')
-    joblib.load('model_rf_5c')
-    joblib.load('model_ac_5c')
-    joblib.load('model_knn_3c')
-    joblib.load('model_rf_3c')
-    joblib.load('model_ac_3c')
+    knn_tp=joblib.load("model_knn_tp")
+    rf_tp=joblib.load("model_rf_tp")
+    ac_tp=joblib.load("model_ac_tp")
+    
+    y_pred_knn_tp=knn_tp.predict(X_test_scaled)
+    y_pred_rf_tp=rf_tp.predict(X_test_scaled)
+    y_pred_ac_tp=ac_tp.predict(X_test_scaled)
+    
+
+    model_choisi=st.selectbox(label="Modèle",options=['KNeighbors Regressor','Random Forest Regressor','DecisionTree Regressor'])
+
+    @st.cache_data
+    def train_model(model_choisi):
+        if model_choisi=='KNeighbors Regressor':
+            y_pred=y_pred_knn_tp
+            score_tp=knn_tp.score(X_test_scaled,y_test)
+        elif model_choisi=='Random Forest Regressor':
+            y_pred=y_pred_rf_tp
+            score_tp=rf_tp.score(X_test_scaled,y_test)
+        elif model_choisi=='DecisionTree Regressor':
+            y_pred=y_pred_ac_tp
+            score_tp=ac_tp.score(X_test_scaled,y_test)
+        return score_tp
+
+    st.write("score sans classe",train_model(model_choisi))
+
+    st.subheader("5 classes")
+    Final_1_5c=Final_1
+    Final_1_5c['Class_duree']=pd.qcut(Final_1_5c['TravelTimeSeconds'],5,labels =[1,2,3,4,5])
+    Final_1_5c=Final_1_5c.drop(['TravelTimeSeconds','IncidentNumber','DateOfCall_bis','DelayCodeId_bis'], axis=1)
+    Final_1_5c=Final_1_5c.dropna()
+    data_5c=Final_1_5c.drop(['Class_duree'], axis=1)
+    target_5c=Final_1_5c['Class_duree']
+    X_train_5c,X_test_5c,y_train_5c,y_test_5c=train_test_split(data_5c,target_5c,test_size=0.2,random_state=66)
+    X_train_5c_scaled=preprocessing.scale(X_train_5c)
+    scaler_5c=preprocessing.StandardScaler().fit(X_train_5c)
+    X_train_5c_scaled=scaler_5c.transform(X_train_5c)
+    scaler_5c=preprocessing.StandardScaler().fit(X_test_5c)
+    X_test_5c_scaled=scaler_5c.transform(X_test_5c)
+
+    knn_5c=joblib.load('model_knn_5c')
+    rf_5c=joblib.load('model_rf_5c')
+    ac_5c=joblib.load('model_ac_5c')
+    
+    y_pred_knn_5c=knn_5c.predict(X_test_5c_scaled)
+    y_pred_rf_5c=rf_5c.predict(X_test_5c_scaled)
+    y_pred_ac_5c=ac_5c.predict(X_test_5c_scaled)
+    
+    model_choisi_5c=st.selectbox(label="Modèle",options=['KNeighbors Classifier 5 classes','Random Forest Classifier 5 classes','DecisionTree Classifier 5 classes'])
+
+    @st.cache_data
+    def train_model_5c(model_choisi_5c):
+        if model_choisi_5c=='KNeighbors Classifier 5 classes':
+            y_pred_5c=y_pred_knn_5c
+            score_5c=knn_5c.score(X_test_5c_scaled,y_test_5c)
+        elif model_choisi_5c=='Random Forest Classifier 5 classes':
+            y_pred_5c=y_pred_rf_5c
+            score_5c=rf_5c.score(X_test_5c_scaled,y_test_5c)
+        elif model_choisi_5c=='DecisionTree Classifier 5 classes':
+            y_pred_5c=y_pred_ac_5c
+            score_5c=ac_5c.score(X_test_5c_scaled,y_test_5c)
+        return score_5c
+    
+    st.write("score 5 classes",train_model_5c(model_choisi_5c))
+
+    @st.cache_data
+    def crosstab_5c(model_choisi_5c):
+        if model_choisi_5c=='KNeighbors Classifier 5 classes':
+            crosstab_5c=pd.crosstab(y_test_5c,y_pred_knn_5c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        elif model_choisi_5c=='Random Forest Classifier 5 classes':
+            crosstab_5c=pd.crosstab(y_test_5c,y_pred_rf_5c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        elif model_choisi_5c=='DecisionTree Classifier 5 classes':
+            crosstab_5c=pd.crosstab(y_test_5c,y_pred_ac_5c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        return crosstab_5c
+    
+    st.write("crosstab 5 classes",crosstab_5c(model_choisi_5c))
+
+
+    st.subheader("3 classes")
+    Final_1_3c=Final_1
+    Final_1_3c['Class_duree']=pd.qcut(Final_1_3c['TravelTimeSeconds'],3,labels =[1,2,3])
+    Final_1_3c=Final_1_3c.drop(['TravelTimeSeconds','IncidentNumber','DateOfCall_bis','DelayCodeId_bis'], axis=1)
+    Final_1_3c=Final_1_3c.dropna()
+    data_3c=Final_1_3c.drop(['Class_duree'], axis=1)
+    target_3c=Final_1_3c['Class_duree']
+    X_train_3c,X_test_3c,y_train_3c,y_test_3c=train_test_split(data_3c,target_3c,test_size=0.2,random_state=66)
+    X_train_3c_scaled=preprocessing.scale(X_train_3c)
+    scaler_3c=preprocessing.StandardScaler().fit(X_train_3c)
+    X_train_3c_scaled=scaler_3c.transform(X_train_3c)
+    scaler_3c=preprocessing.StandardScaler().fit(X_test_3c)
+    X_test_3c_scaled=scaler_3c.transform(X_test_3c)
+
+    knn_3c=joblib.load('model_knn_3c')
+    rf_3c=joblib.load('model_rf_3c')
+    ac_3c=joblib.load('model_ac_3c')
+
+    y_pred_knn_3c=knn_3c.predict(X_test_3c_scaled)
+    y_pred_rf_3c=rf_3c.predict(X_test_3c_scaled)
+    y_pred_ac_3c=ac_3c.predict(X_test_3c_scaled)
+
+    model_choisi_3c=st.selectbox(label="Modèle",options=['KNeighbors Classifier 3 classes','Random Forest Classifier 3 classes','DecisionTree Classifier 3 classes'])
+
+    @st.cache_data
+    def train_model_3c(model_choisi_3c):
+        if model_choisi_3c=='KNeighbors Classifier 3 classes':
+            y_pred_3c=y_pred_knn_3c
+            score_3c=knn_3c.score(X_test_3c_scaled,y_test_3c)
+        elif model_choisi_3c=='Random Forest Classifier 3 classes':
+            y_pred_3c=y_pred_rf_3c
+            score_3c=rf_3c.score(X_test_3c_scaled,y_test_3c)
+        elif model_choisi_3c=='DecisionTree Classifier 3 classes':
+            y_pred_3c=y_pred_ac_3c
+            score_3c=ac_3c.score(X_test_3c_scaled,y_test_3c)
+        return score_3c
+    
+    st.write("score 3 classes",train_model_3c(model_choisi_3c))
+
+    @st.cache_data
+    def crosstab_3c(model_choisi_3c):
+        if model_choisi_3c=='KNeighbors Classifier 3 classes':
+            crosstab_3c=pd.crosstab(y_test_3c,y_pred_knn_3c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        elif model_choisi_3c=='Random Forest Classifier 3 classes':
+            crosstab_3c=pd.crosstab(y_test_3c,y_pred_rf_3c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        elif model_choisi_3c=='DecisionTree Classifier 3 classes':
+            crosstab_3c=pd.crosstab(y_test_3c,y_pred_ac_3c,rownames=['Classe réelle'], colnames=['Classe prédite'])
+        return crosstab_3c
+    
+    st.write("crosstab 3 classes",crosstab_3c(model_choisi_3c))
