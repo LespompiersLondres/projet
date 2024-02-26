@@ -17,6 +17,15 @@ Calendrier=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/London_Pomp
 Meteo=pd.read_excel(r"\Users\agrabia\Documents\Formation\Projet/london_weather2.xlsx")
 Final_1=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Final_1_corrt.csv")
 
+#Poste de Dan
+#Incident=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/LFB Incident data Last 3 years.csv")
+#Mobilisation=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/LFB Mobilisation data Last 3 years.csv", sep=';')
+#Coordonnees_brigade=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/LondonFireBrigade_Coordonnées.csv",sep=';')
+#Calendrier=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/London_Pompyer_Calendrier.csv", 
+#sep=';')
+#Meteo=pd.read_excel(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/london_weather2.xlsx")
+#Final_1=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/Final_1_corrt.csv")
+
 st.title("Projet Pompyer")
 st.sidebar.title("Sommaire")
 pages=["Description du projet","Jeux de données","Visualisation","Préparation des données et Modélisation : Modèle à variables minimales","Préparation des données et Modélisation : Modèle à variables maximales" ,"Machine Learning : Modèle à variables minimales","Machine Learning : Modèle à variables maximales","Conclusion","Cartographie"]
@@ -191,6 +200,26 @@ if page==pages[2]:
 
 if page==pages[3]:
     st.header("Préparation des données et Modélisation : Modèle à variables minimales ")
+
+    st.markdown(""" L'idée de cette démarche est de chercher un "minimum qui marche" avant de l'enrichir avec davantage de variables explicatives. 
+                    La démarche a donc été la suivante:""")
+    st.markdown("""
+                    - Fusion des datasets disponibles : aucune corrélation probante ne ressort (voir annexe)
+
+                    - Identification de la variable cible : TravelTimeSeconds (temps d’intervention en secondes) qui couvre le temps d’arrivée de l’équipe ; bref, le temps précieux pour les victimes.
+
+                    - Identification des variables explicatives minimales :
+                    De l’étude préliminaire, seules 2 variables semblaient légèrement évoluer : l’heure de l’appel (HourOfCall) et la date de l’appel dans le calendrier (CalYear)
+
+                    - Lancement des apprentissages, observation des résultats :
+                    De par la nature de la distribution, les algorithmes de régression ont semblé les plus appropriés. Toutefois, ni un apprentissage par random forest, ni un apprentissage par k voisin n’ont donné de résultat satisfaisant (scores plafonnant à 0,01).
+
+                    - Intégration de données météorologiques :
+                    L’objectif de cette étape est de voir si de meilleurs résultats sont obtenus en enrichissant l’apprentissage avec de nouvelles variables explicatives, en l’occurrence liées à la météo. Il aura fallu éliminer certaines variables avec des valeurs nulles (la neige notamment, peu pertinente à Londres). Les variables ajoutées ont donc été : le taux de couverture par nuages, l’ensoleillement, la température moyenne, et les précipitations. Le résultat obtenu par KNN fut un peu meilleur à 0,06.
+
+                    - Division par quartiles :
+                    Une division en 4 quartiles de la cible aura permis de donner un score de 0,05. Cette division en quartiles n’aura donc rien apporté.
+	                """)
 
 if page==pages[4]:
     st.header("Préparation des données et Modélisation : Modèle à variables maximales")
@@ -403,3 +432,40 @@ if page==pages[6]:
         return crosstab_3c
     
     st.write("crosstab 3 classes",crosstab_3c(model_choisi_3c))
+
+if page==pages[7]:
+    st.header("Conclusion")
+    st.markdown(""" L’étude statistique réalisée au préalable a été nécessaire pour bien comprendre les bases disponibles et observer les différentes répartitions des observations par variable. Même si les graphiques les
+                    plus pertinents ont été présentés ici, toutes les variables ont été étudiées individuellement.
+                """)
+    st.markdown(""" 
+                    Ce projet aura été une expérience intéressante, tant sur le contenu que sur le vécu : une
+                    coordination régulière qui aura permis d’explorer des pistes en parallèles à la hauteur des moyens
+                    de chacun, à l’image d’une véritable petite équipe de data scientists, confrontés à certaines réalités.
+                    Ainsi, le fait de ne rien trouver de significatif nous apprend qu’il faut être patient et persévérant. Si
+                    projet devait se poursuivre, peut-être explorerions-nous d’autres pistes telles que le trafic routier,
+                    élément qui n’a finalement pas été intégré dans nos modèles. Toutefois, trouver des données par
+                    quartier, jour et heure depuis 2020 aurait pu être assez complexe.
+                """)
+    st.markdown(""" 
+                    Finalement, aucun modèle produit n’a produit un automate capable de prédire le temps
+                    d’intervention des équipes de pompiers de Londres avec un minimum de déterminisme. A l’heure
+                    de la conclusion, il convient peut-être de souligner que les temps d’arrivée du premier équipage sur
+                    un incident sont assez proches. En effet, le temps médian d’arrivée atteint 292 secondes, soit un peu
+                    moins de 5 minutes alors que 25% des temps d’arrivée étaient inférieurs à 4 minutes (228 secondes)
+                    et 75% des temps d’arrivée légèrement supérieurs à 6 minutes (370 secondes). Peut-on prédire un
+                    temps qui n’évoluera que dans un intervalle très réduit ? Et si la conclusion était que Londres a une
+                    distribution géographique et une organisation des pompiers efficaces permettant de garantir une
+                    intervention en un temps optimal ? Avec un temps moyen d’arrivée de 310 secondes, soit 5.16
+                    minutes, les brigades londoniennes semblent en effet légèrement plus rapides que les brigades
+                    parisiennes (pour rappel, 6,15 minutes en 2022). Et parce que chaque seconde compte, une brigade
+                    d’ambulancier à vélo existe depuis 2000 dans la capitale anglaise pour s’occuper des cas les moins
+                    critiques.""")
+if page==pages[8]:
+    st.header("Carte Interactive")
+    
+    # Charger et afficher une page HTML interactive
+    with open("map.html", "r") as f:
+        html_content = f.read()
+          
+    st.components.v1.html(html_content, height=600, scrolling=False)
