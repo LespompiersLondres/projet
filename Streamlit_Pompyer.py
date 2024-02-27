@@ -25,6 +25,9 @@ Final_1=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Final_1_corrt.
 #sep=';')
 #Meteo=pd.read_excel(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/london_weather2.xlsx")
 #Final_1=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/Final_1_corrt.csv")
+#merged_var_minimum=pd.read_csv('/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_var_minimum.csv')
+#merged_traveltime_meteo=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_traveltime_meteo.csv")
+#merged_traveltime_meteo_quartiles=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_traveltime_meteo_quartiles.csv")
 
 st.title("Projet Pompyer")
 st.sidebar.title("Sommaire")
@@ -209,17 +212,22 @@ if page==pages[3]:
                     - Identification de la variable cible : TravelTimeSeconds (temps d’intervention en secondes) qui couvre le temps d’arrivée de l’équipe ; bref, le temps précieux pour les victimes.
 
                     - Identification des variables explicatives minimales :
-                    De l’étude préliminaire, seules 2 variables semblaient légèrement évoluer : l’heure de l’appel (HourOfCall) et la date de l’appel dans le calendrier (CalYear)
-
-                    - Lancement des apprentissages, observation des résultats :
-                    De par la nature de la distribution, les algorithmes de régression ont semblé les plus appropriés. Toutefois, ni un apprentissage par random forest, ni un apprentissage par k voisin n’ont donné de résultat satisfaisant (scores plafonnant à 0,01).
-
+                    De l’étude préliminaire, seules 2 variables semblaient légèrement évoluer : l’heure de l’appel (HourOfCall) et la date de l’appel dans le calendrier (CalYear)""")
+    if st.checkbox("Premières lignes du modèle à variables minimales"):
+          st.dataframe(merged_var_minimum.head(10))
+    
+    st.markdown("""
                     - Intégration de données météorologiques :
-                    L’objectif de cette étape est de voir si de meilleurs résultats sont obtenus en enrichissant l’apprentissage avec de nouvelles variables explicatives, en l’occurrence liées à la météo. Il aura fallu éliminer certaines variables avec des valeurs nulles (la neige notamment, peu pertinente à Londres). Les variables ajoutées ont donc été : le taux de couverture par nuages, l’ensoleillement, la température moyenne, et les précipitations. Le résultat obtenu par KNN fut un peu meilleur à 0,06.
+                    L’objectif de cette étape est de voir si de meilleurs résultats sont obtenus en enrichissant l’apprentissage avec de nouvelles variables explicatives, en l’occurrence liées à la météo. Il aura fallu éliminer certaines variables avec des valeurs nulles (la neige notamment, peu pertinente à Londres). Les variables ajoutées ont donc été : le taux de couverture par nuages, l’ensoleillement, la température moyenne, et les précipitations.""")
+    if st.checkbox("Premières lignes du modèle à variables minimales incluant la météo"):
+          st.dataframe(merged_traveltime_meteo.head(10))
 
+    st.markdown("""
                     - Division par quartiles :
                     Une division en 4 quartiles de la cible aura permis de donner un score de 0,05. Cette division en quartiles n’aura donc rien apporté.
 	                """)
+    if st.checkbox("Premières lignes du modèle à variables minimales incluant la météo avec une répartition de la cible en quartiles"):
+          st.dataframe(merged_traveltime_meteo_quartiles.head(10))   
 
 if page==pages[4]:
     st.header("Préparation des données et Modélisation : Modèle à variables maximales")
