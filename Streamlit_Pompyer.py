@@ -16,6 +16,9 @@ Coordonnees_brigade=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Lo
 Calendrier=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/London_Pompyer_Calendrier.csv", sep=';')
 Meteo=pd.read_excel(r"\Users\agrabia\Documents\Formation\Projet/london_weather2.xlsx")
 Final_1=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/Final_1_corrt.csv")
+merged_var_minimum=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/merged_var_minimum.csv")
+merged_traveltime_meteo=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/merged_traveltime_meteo.csv")
+merged_traveltime_meteo_quartiles=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/merged_traveltime_meteo_quartiles.csv")
 
 #Poste de Dan
 #Incident=pd.read_csv(r"/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/LFB Incident data Last 3 years.csv")
