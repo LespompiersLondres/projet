@@ -309,12 +309,14 @@ if page==pages[6]:
     X_train_scaled=preprocessing.scale(X_train)
     scaler=preprocessing.StandardScaler().fit(X_train)
     X_train_scaled=scaler.transform(X_train)
-    scaler=preprocessing.StandardScaler().fit(X_test)
     X_test_scaled=scaler.transform(X_test)
 
     knn_tp=joblib.load("model_knn_tp")
     rf_tp=joblib.load("model_rf_tp")
     ac_tp=joblib.load("model_ac_tp")
+
+    #X_test_scaled_tp=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/X_test_scaled_tp.csv")
+    #y_test_tp=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/y_test_tp.csv")
     
     y_pred_knn_tp=knn_tp.predict(X_test_scaled)
     y_pred_rf_tp=rf_tp.predict(X_test_scaled)
@@ -349,13 +351,15 @@ if page==pages[6]:
     X_train_5c_scaled=preprocessing.scale(X_train_5c)
     scaler_5c=preprocessing.StandardScaler().fit(X_train_5c)
     X_train_5c_scaled=scaler_5c.transform(X_train_5c)
-    scaler_5c=preprocessing.StandardScaler().fit(X_test_5c)
     X_test_5c_scaled=scaler_5c.transform(X_test_5c)
 
     knn_5c=joblib.load('model_knn_5c')
     rf_5c=joblib.load('model_rf_5c')
     ac_5c=joblib.load('model_ac_5c')
     
+    #X_test_5c_scaled=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/X_test_scaled_5c.csv")
+    #y_test_5c=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/y_test_5c.csv")
+
     y_pred_knn_5c=knn_5c.predict(X_test_5c_scaled)
     y_pred_rf_5c=rf_5c.predict(X_test_5c_scaled)
     y_pred_ac_5c=ac_5c.predict(X_test_5c_scaled)
@@ -401,12 +405,14 @@ if page==pages[6]:
     X_train_3c_scaled=preprocessing.scale(X_train_3c)
     scaler_3c=preprocessing.StandardScaler().fit(X_train_3c)
     X_train_3c_scaled=scaler_3c.transform(X_train_3c)
-    scaler_3c=preprocessing.StandardScaler().fit(X_test_3c)
     X_test_3c_scaled=scaler_3c.transform(X_test_3c)
 
     knn_3c=joblib.load('model_knn_3c')
     rf_3c=joblib.load('model_rf_3c')
     ac_3c=joblib.load('model_ac_3c')
+
+    #X_test_3c_scaled=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/X_test_scaled_3c.csv")
+    #y_test_3c=pd.read_csv(r"C:\Users\agrabia\Documents\Formation\Projet/y_test_3c.csv")
 
     y_pred_knn_3c=knn_3c.predict(X_test_3c_scaled)
     y_pred_rf_3c=rf_3c.predict(X_test_3c_scaled)
