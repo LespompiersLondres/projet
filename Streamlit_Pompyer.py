@@ -170,7 +170,7 @@ if page==pages[1]:
 
 if page==pages[2]:
     st.header("Visualisation")
-    st.markdown("Voici quelques modélisations issues des .")
+    st.markdown("Voici quelques modélisations issues de l'exploitation des tables à disposition.")
     st.subheader("Répartition des incidents par mois et par heures d’appel")
     Incident['DateOfCall_bis'] = pd.to_datetime(Incident['DateOfCall'])
     Incident["MonthOfCall"] = Incident['DateOfCall_bis'].dt.month
@@ -299,82 +299,82 @@ if page==pages[4]:
     if st.checkbox("Afficher les 10 premières lignes de la table Final_1"):
         st.dataframe(Final_1.head(10))
     
-if page==pages[5]:    
-     st.header("Machine Learning : Modèle à variables minimales")
-     st.subheader("Cible: Temps de trajet")
+if page==pages[5]:
+    st.header("Machine Learning : Modèle à variables minimales")
+    st.subheader("Cible: Temps de trajet")
 
-     model_choisi=st.selectbox(label="Modèle",options=['Modèle minimal','Modèle minimal météo','Modèle min. météo quartiles'])
+    model_choisi=st.selectbox(label="Modèle",options=['Modèle minimal','Modèle minimal météo','Modèle min. météo quartiles'])
      
-     @st.cache_data
-     def train_model(model_choisi):
-         if model_choisi=='Modèle minimal':
-             st.write("Modèle à variable minimal en random forest ")
-             from sklearn.ensemble import RandomForestRegressor
-             target=merged_var_minimum['TravelTimeSeconds'] 
-             df_train=merged_var_minimum[['HourOfCall', 'CalYear']]
+    @st.cache_data
+    def train_model(model_choisi):
+        if model_choisi=='Modèle minimal':
+            st.write("Modèle à variable minimal en random forest ")
+            from sklearn.ensemble import RandomForestRegressor
+            target=merged_var_minimum['TravelTimeSeconds'] 
+            df_train=merged_var_minimum[['HourOfCall', 'CalYear']]
 
-             X_train, X_test, y_train, y_test = train_test_split(df_train, target, test_size=0.2)
-             clf =RandomForestRegressor(max_depth=2, random_state=0)
-             clf.fit(X_train, y_train)
+            X_train, X_test, y_train, y_test = train_test_split(df_train, target, test_size=0.2)
+            clf =RandomForestRegressor(max_depth=2, random_state=0)
+            clf.fit(X_train, y_train)
 
-             y_randomForest = clf.predict(X_test)
+            y_randomForest = clf.predict(X_test)
 
-             score = clf.score(X_train, y_train)
+            score = clf.score(X_train, y_train)
              
-         elif model_choisi=='Modèle minimal météo':
-             st.write("Modèle KNN à variable minimal avec meteo")
-             from sklearn import neighbors
-#             merged_df=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_meteo.csv")
-             df=merged_traveltime_meteo[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall', 'TravelTimeSeconds']]
-             df=df.dropna()
+        elif model_choisi=='Modèle minimal météo':
+            st.write("Modèle KNN à variable minimal avec meteo")
+            from sklearn import neighbors
+#            merged_df=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_meteo.csv")
+            df=merged_traveltime_meteo[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall', 'TravelTimeSeconds']]
+            df=df.dropna()
              
-             target=df['TravelTimeSeconds'] 
-             df_train=df[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall']]
+            target=df['TravelTimeSeconds'] 
+            df_train=df[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall']]
 
-             X_train, X_test, y_train, y_test = train_test_split(df_train, target, test_size=0.2)
-             score_knn=[]
+            X_train, X_test, y_train, y_test = train_test_split(df_train, target, test_size=0.2)
+            score_knn=[]
 
-             for k in range(2, 41):
-             	knn=neighbors.KNeighborsRegressor(n_neighbors=k)
-             	knn.fit(X_train, y_train)
-             	score_knn.append(knn.score(X_test, y_test))
+            for k in range(2, 41):
+                knn=neighbors.KNeighborsRegressor(n_neighbors=k)
+                knn.fit(X_train, y_train)
+                score_knn.append(knn.score(X_test, y_test))
 
-             y_knn = knn.predict(X_test)
+            y_knn = knn.predict(X_test)
 
-             score = knn.score(X_train, y_train)
+            score = knn.score(X_train, y_train)
              
-         elif model_choisi=='Modèle min. météo quartiles':
-             st.write("Modèle KNN à variable minimal avec meteo, en quartiles")
-             from sklearn import neighbors
-#             merged_df=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_meteo.csv")
-             df=merged_traveltime_meteo[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall', 'TravelTimeSeconds']]
-             df=df.dropna()
+        elif model_choisi=='Modèle min. météo quartiles':
+            st.write("Modèle KNN à variable minimal avec meteo, en quartiles")
+            from sklearn import neighbors
+#            merged_df=pd.read_csv("/home/user/Bureau/dataScientest/projet_pompiers_Londres/data/merged_meteo.csv")
+            df=merged_traveltime_meteo[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall', 'TravelTimeSeconds']]
+            df=df.dropna()
              
-             target=df['TravelTimeSeconds'] 
-             df_train=df[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall']]
+            target=df['TravelTimeSeconds'] 
+            df_train=df[['cloud_cover', 'sunshine', 'mean_temp', 'precipitation', 'CalYear', 'HourOfCall']]
              
              # Diviser la cible en quartiles (4 quartiles)
-             quartiles = pd.qcut(target, q=4, labels=False)
+            quartiles = pd.qcut(target, q=4, labels=False)
 
 	# Diviser les données en ensembles d'entraînement et de test
-             X_train, X_test, y_train, y_test = train_test_split(df_train, quartiles, test_size=0.2)
+            X_train, X_test, y_train, y_test = train_test_split(df_train, quartiles, test_size=0.2)
 
-             score_knn=[]
+            score_knn=[]
 
-             for k in range(2, 41):
-             	knn=neighbors.KNeighborsRegressor(n_neighbors=k)
-             	knn.fit(X_train, y_train)
-             	score_knn.append(knn.score(X_test, y_test))
+            for k in range(2, 41):
+                knn=neighbors.KNeighborsRegressor(n_neighbors=k)
+                knn.fit(X_train, y_train)
+                score_knn.append(knn.score(X_test, y_test))
 	
-             y_knn = knn.predict(X_test)
+            y_knn = knn.predict(X_test)
 
-             score = knn.score(X_train, y_train)
-         else:
-             score=-1
+            score = knn.score(X_train, y_train)
+        else:
+            score=-1
 
-         return score
+        return score
 
-     st.write("score : ",train_model(model_choisi))
+    st.write("score : ",train_model(model_choisi))
 
 
 if page==pages[6]:
