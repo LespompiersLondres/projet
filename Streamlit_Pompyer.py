@@ -293,7 +293,7 @@ if page==pages[4]:
                 - Une fois ces modifications effectuées, cette table principale a été jointe aux tables Calendrier et Coordonnees_Brigade
                 - Le package BNG a permis de transformer les coordonnées géographiques britanniques en latitude et longitude. Le package Geopy a ensuite été utilisé pour calculer les distances entre le lieu de l'incident et les coordonnées de la caserne
                 - Les quelques NA présents sur la variable cible 'TravelTimeSeconds' ont été supprimés
-                - Le temps moyen de parcours en fonction de la caserne et de l'heure de l'appel ainsi que le temps moyen de parcours en fonction du quartier et de l'heure de départ ont été calculés. Les deux nouvelles variables ainsi créées ont pu remplacer les variables 'IncGeo_BoroughCode' et 'DeployedDromStation_Name'
+                - Le temps moyen de parcours en fonction de la caserne et de l'heure de l'appel ainsi que le temps moyen de parcours en fonction du quartier et de l'heure d'appel ont été calculés. Les deux nouvelles variables ainsi créées ont pu remplacer les variables 'IncGeo_BoroughCode' et 'DeployedFromStation_Name'
                 - Enfin, la table principale a été jointe avec la table Meteo et la table finale a été exportée (Final_1)
                 """)
     if st.checkbox("Afficher les 10 premières lignes de la table Final_1"):
